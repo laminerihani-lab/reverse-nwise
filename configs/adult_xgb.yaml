@@ -1,0 +1,35 @@
+# exp01 -- Table 1 reproduction on UCI Adult + XGBoost (pairwise, s=2).
+benchmark: adult
+model: xgboost
+strength: 2
+
+xgboost:
+  n_estimators: 200
+  max_depth: 6
+  learning_rate: 0.1
+  subsample: 0.9
+  colsample_bytree: 0.9
+
+# 9-factor, all-ternary behavioural output space (pairwise universe = 324).
+partition_scheme:
+  - {kind: categorical, alphabet: [neg, boundary, pos]}          # decision
+  - {kind: threshold_bands, edges: [0.6, 0.85], labels: [low, med, high]}  # confidence
+  - {kind: threshold_bands, edges: [-0.15, 0.15], labels: [far_neg, near, far_pos]}  # margin
+  - {kind: categorical, alphabet: [consistent, weak, inconsistent]}  # sex_consistency
+  - {kind: categorical, alphabet: [young, mid, senior]}          # age_band
+  - {kind: categorical, alphabet: [private, gov, other]}         # workclass_grp
+  - {kind: categorical, alphabet: [drop, stable, rise]}          # edu_response
+  - {kind: categorical, alphabet: [drop, stable, rise]}          # hours_response
+  - {kind: categorical, alphabet: [none, moderate, high]}        # capgain_regime
+
+inverse_map:
+  optimizer: jaya
+  max_iter: 200
+  lambda: 0.0
+  warm_start: true
+
+feasibility:
+  probes: 8000
+
+baselines: [input_ct, random, property_based, metamorphic, deepct]
+seeded_faults: 8
