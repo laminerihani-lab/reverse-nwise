@@ -13,8 +13,6 @@ may all collapse to the same output.
 The package implements Algorithm 1 end-to-end and reproduces every table/figure
 in the empirical section from scratch on commodity hardware.
 
-![Concept: invert the combinatorial-testing paradigm — cover the output space, then recover inputs](docs/concept.png)
-
 ## What's here
 
 ```
@@ -32,10 +30,12 @@ rnwise/            core method (the tool)
 baselines/         Input CT, Random, Property-Based, Metamorphic, DeepCT
 benchmarks/
   adult/             UCI Adult + XGBoost SUT, 9-factor output space, 8 faults
+  vision/            digits MLP over a PCA latent space (decision-boundary output)
+  nlp/               20-newsgroups TF-IDF+SVD text classifier (embedding-cluster output)
   quantum/           self-contained NISQ statevector SUT (no qiskit needed)
 experiments/       exp01..exp06 (see below)
 analysis/          stats (MWU / bootstrap / Cliff's delta), LaTeX tables, plots
-tests/             76 unit + integration tests
+tests/             81 unit + integration tests
 configs/           declarative experiment configs + fixed seeds
 ```
 
@@ -68,8 +68,8 @@ python -m experiments.exp05_ablations --seed 0 --json results/exp05.json
 # exp06 — cost profile (per-step timing, memory, budget ratio)
 python -m experiments.exp06_cost --seed 0 --json results/exp06.json
 
-# exp02 — multi-domain generality: quantum NISQ SUT (VQE inverse map)
-python -m experiments.exp02_multidomain --seed 0 --json results/exp02.json
+# exp02 — multi-domain generality: quantum + vision + NLP SUTs
+python -m experiments.exp02_multidomain --domains quantum vision nlp --json results/exp02.json
 
 # regenerate LaTeX tables + figures from the JSON artifacts
 python -m analysis.tables --exp04 results/exp04.json --exp03 results/exp03.json --out results/tables
@@ -97,10 +97,25 @@ Strength scaling (exp03): OCov_s stays at 100% for s = 2, 3, 4 while the suite
 grows sub-linearly with the output universe (324 → 2,268 → 10,206), and the
 Corollary 1 bound M ≥ vˢ holds at every strength.
 
+## Multi-domain generality (exp02)
+
+The *same* Algorithm 1 pipeline, applied across three structurally different
+domains (each with its own SUT, output partition, search space, and inverse-map
+optimizer), vs. a matched-budget random baseline:
+
+| Domain | Optimizer | RNWise OCov₂ / FDR | Random OCov₂ / FDR |
+|---|---|---|---|
+| Quantum (NISQ circuit) | VQE | **100% / 5/5** | 73.0% / 2/5 |
+| Vision (digits MLP) | Jaya | **100% / 5/5** | 61.6% / 0/5 |
+| NLP (20-newsgroups) | Jaya | **100% / 5/5** | 74.1% / 1/5 |
+
+Together with the Adult study, this exercises the method on tabular ML, vision,
+NLP, and quantum systems — output-oriented coverage is domain-agnostic.
+
 ## Tests
 
 ```bash
-pytest              # 76 fast unit tests
+pytest              # 81 fast unit tests
 pytest -m ""        # include slow integration tests (train models, full pipeline)
 ```
 

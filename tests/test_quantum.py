@@ -69,12 +69,11 @@ def test_search_space_bounds():
 
 @pytest.mark.slow
 def test_exp02_rnwise_beats_random_quantum():
-    from experiments.exp02_multidomain import run
+    from experiments.exp02_multidomain import run_domain
 
-    res = run(seed=0, n_probes=1500, max_iter=80)
-    rows = {r["method"]: r for r in res["results"]}
-    rn = rows["Reverse N-Wise (VQE)"]
+    r = run_domain("quantum", seed=0, n_probes=1500, max_iter=80)
+    rows = {row["method"].split(" [")[0].strip(): row for row in r["results"]}
+    rn = next(v for k, v in rows.items() if k.startswith("Reverse"))
     assert rn["OCov_s"] >= 0.98
-    # RNWise out-covers matched-budget random
-    assert rn["OCov_s"] > rows["Random-Q"]["OCov_s"]
-    assert res["realisation_rate"] == 1.0
+    assert rn["OCov_s"] > rows["Random (matched)"]["OCov_s"]
+    assert r["realisation_rate"] == 1.0

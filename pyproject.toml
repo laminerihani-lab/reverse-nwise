@@ -69,6 +69,10 @@ addopts = "-ra -q"
 markers = [
     "slow: integration tests that train models / run full experiments",
 ]
+filterwarnings = [
+    # sklearn's digits loader sets ndarray.shape (deprecated in NumPy 2.5)
+    "ignore:Setting the shape on a NumPy array has been deprecated:DeprecationWarning",
+]
 
 [tool.ruff]
 line-length = 100
