@@ -13,6 +13,8 @@ may all collapse to the same output.
 The package implements Algorithm 1 end-to-end and reproduces every table/figure
 in the empirical section from scratch on commodity hardware.
 
+![Concept: invert the combinatorial-testing paradigm — cover the output space, then recover inputs](docs/concept.png)
+
 ## What's here
 
 ```
