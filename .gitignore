@@ -38,14 +38,3 @@ paper/*.run.xml
 paper/sections/*.aux
 # anonymised submission build is regenerable via `make anon`
 paper/main-blind.pdf
-
-# AST 2027 build (ACM acmart) -- shares content with paper/
-paper-ast/*.aux
-paper-ast/*.bbl
-paper-ast/*.blg
-paper-ast/*.fdb_latexmk
-paper-ast/*.fls
-paper-ast/*.log
-paper-ast/*.out
-paper-ast/*.run.xml
-paper-ast/main-blind.pdf
