@@ -1,0 +1,67 @@
+\section{Related Work}
+\label{sec:related}
+
+We position \rnwise{} against four lines of work. The consistent distinction is
+that prior techniques either (i) build covering arrays over \emph{inputs} or
+internal structure, or (ii) reason about outputs without a combinatorial
+interaction guarantee and without constructive \emph{inverse} generation. To our
+knowledge, no prior method combines a $t$-way covering array over abstracted
+\emph{output-behaviour} classes with optimisation-based inverse mapping to inputs.
+
+\subsection{Combinatorial interaction testing}
+Classical CIT constructs $t$-way covering arrays over input parameters. The
+interaction rule and its empirical basis are due to Kuhn et
+al.~\cite{kuhn2004software}; algorithmic construction is exemplified by
+AETG~\cite{cohen1997aetg} and IPOG/ACTS~\cite{lei2007ipog}, and the field is
+surveyed by Nie and Leung~\cite{nie2011survey}. All of this work places the array
+over \emph{inputs}. \rnwise{} reuses the covering-array machinery but relocates it
+to an abstracted output space, and adds an inverse-mapping stage that has no
+analogue in input-side CIT (where the array rows \emph{are} the tests).
+
+\subsection{Combinatorial and structural testing of deep learning}
+DeepCT~\cite{ma2019deepct} applies $t$-way combinatorial coverage to deep
+networks, but its factors are \emph{internal neuron activations within layers};
+it covers combinations of latent/neuron states, not model outputs, and does not
+invert toward prescribed behaviours. This is the closest work by name, and the
+distinction is central: DeepCT covers the \emph{internal} feature space, whereas
+\rnwise{} covers the \emph{external} output-behaviour space. Structural DNN
+adequacy criteria are likewise internal or input-centric: neuron coverage
+(DeepXplore~\cite{pei2017deepxplore}), multi-granularity neuron criteria
+(DeepGauge~\cite{ma2018deepgauge}), and surprise adequacy over activation traces
+(SADL~\cite{kim2019surprise}). None impose a combinatorial interaction guarantee
+over semantic output classes.
+
+\subsection{Output-oriented and behavioural testing}
+Output-diversity criteria select tests to maximise distinct observed outputs;
+Men\'endez et al.~\cite{menendez2022output} sample outputs to diversify a unit-test
+suite. These treat outputs as a flat set and provide neither a multi-dimensional
+$t$-way interaction guarantee nor inverse input recovery. In NLP,
+CheckList~\cite{ribeiro2020checklist} organises behavioural tests along a manual
+capability$\times$test-type matrix; the matrix is a hand-authored taxonomy rather
+than a covering array, and tests are template-generated, not inverse-optimised to
+hit enumerated output classes. \rnwise{} differs by constructing the output
+interaction space automatically and satisfying it constructively.
+
+\subsection{Search-based and targeted test generation}
+Search-based testing generates inputs to satisfy an objective; for ML this
+includes fairness-directed search such as AEQUITAS~\cite{udeshi2018aequitas} and
+adversarial/boundary generation. These are typically single-property or
+boundary-local: they seek an input violating one property or lying near one
+decision boundary. \rnwise{}'s inverse mapping is instead \emph{coverage-driven}:
+it systematically realises \emph{every} feasible $s$-way output-behaviour
+combination enumerated by the covering array, using the objective
+$L(x;w^{*}) = \sum_j \delta(\pi_j(f_j(x)), w^{*}_j) + \lambda R(x)$ and gradient-free
+optimisers~\cite{rao2016jaya,mirjalili2016whale,yang2009firefly}.
+
+\subsection{Quantum software testing}
+Coverage and testing criteria for quantum programs are an active area. The
+closest structural analogue is QuCAT~\cite{wang2023qucat}, which builds $t$-way
+covering arrays for quantum software; crucially, its array is over \emph{input
+parameters / gate configurations} with output oracles, not over abstracted
+output-behaviour classes, and it contains no variational inverse mapping. \rnwise{}
+instead covers a partition of the measurement-outcome behaviour (dominant basis
+state, outcome-distribution entropy, parity, and fidelity-to-ideal under noise)
+and repurposes variational optimisation~\cite{peruzzo2014vqe}---normally used to
+find ground states---as an \emph{inverse test generator} that drives circuit
+parameters toward each target output behaviour. Using VQE as a test generator
+appears to be novel.

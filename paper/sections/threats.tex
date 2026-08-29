@@ -1,0 +1,40 @@
+\section{Threats to Validity}
+\label{sec:threats}
+
+\paragraph{Construct validity}
+Output coverage $\OCov_s$ measures adequacy on the abstracted output space, so its
+meaningfulness depends on the partition scheme $\{\pi_j\}$. A poorly chosen
+abstraction could inflate or deflate coverage. We mitigate this by defining
+partitions from established behavioural properties (calibration, fairness,
+monotonicity, robustness, measurement fidelity) rather than ad hoc bins, and by
+showing (RQ4) that conclusions are stable as granularity varies. Fault detection
+is measured against seeded behavioural faults expressed as output-interaction
+signatures; we seed rare-but-reachable signatures to avoid trivially detectable
+faults, and we report the tie with DeepCT rather than selecting a fault set that
+favours our method.
+
+\paragraph{Internal validity}
+Randomness enters through model training, feasibility probing, and the inverse-map
+optimisers. We control it with fixed seeds and report 30-run distributions with
+non-parametric tests (Mann--Whitney $U$, bootstrap CIs, Cliff's $\delta$) rather
+than single-run point estimates. The prioritised suite is truncated at the
+coverage plateau, a deterministic rule, so suite-size comparisons across methods
+use matched budgets.
+
+\paragraph{External validity}
+Our study covers four domains but a limited number of systems and datasets per
+domain. The quantum SUT is a noisy statevector simulation rather than hardware,
+and the vision/NLP inverse maps operate in latent (PCA / SVD) spaces with
+decode-to-manifold steps, which bound the realism of synthesised inputs. We do not
+claim that $\OCov_s$ correlates with real-world defect discovery beyond the seeded
+faults; establishing that link on production systems is future work. The results
+should be read as evidence that output-interaction coverage is \emph{attainable}
+and \emph{discriminating} across diverse system types, not as a claim of universal
+superiority.
+
+\paragraph{Conclusion validity}
+We use non-parametric tests that make no normality assumption and report effect
+sizes alongside $p$-values. Where \rnwise{} does not dominate---fault detection
+vs.\ DeepCT ($p=0.92$) and tuple efficiency vs.\ DeepCT---we say so explicitly.
+The headline claim is confined to what the data support: unique, statistically
+significant \emph{output coverage}, at low search cost, across domains.

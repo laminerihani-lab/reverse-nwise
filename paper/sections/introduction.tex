@@ -1,0 +1,81 @@
+\section{Introduction}
+\label{sec:intro}
+
+Combinatorial interaction testing (CIT) is one of the most successful
+systematic test-design techniques in software engineering. Its empirical
+foundation is the \emph{interaction rule}: most faults are triggered by the
+interaction of only a few input parameters, so a $t$-way \emph{covering array}
+over the inputs---exercising every combination of values for every $t$ parameters
+at least once---detects a large fraction of faults with a test suite whose size
+grows only logarithmically in the number of parameters~\cite{kuhn2004software,
+nie2011survey}. Mature tools such as ACTS/IPOG~\cite{lei2007ipog} and AETG~\cite{cohen1997aetg}
+construct near-optimal covering arrays over inputs and are widely deployed.
+
+\subsection{The input-side premise breaks for AI/ML and quantum systems}
+CIT is fundamentally \emph{input-oriented}: it reasons about combinations of
+input values and treats the system as a black box whose outputs are merely
+checked by an oracle. This premise is well matched to configuration-style
+software, where distinct input combinations tend to drive distinct control-flow
+paths. It is far less appropriate for modern AI/ML and quantum systems:
+
+\begin{itemize}
+\item The input-to-behaviour map is \emph{opaque and stochastic}. A neural
+network or a noisy quantum circuit realises a map $f: X \to \PY$ into a
+distribution over structured outputs; there is no parameter-interaction
+structure on the inputs that a covering array can target meaningfully.
+\item Inputs \emph{collapse} onto behaviours. Enormous, high-dimensional regions
+of the input space map to the same observable behaviour (the same predicted
+class, the same confidence band, the same measurement-outcome regime). An input
+covering array can therefore exercise many input interactions while touching
+only a handful of distinct behaviours---leaving critical behaviours (e.g.\ a
+fairness inconsistency, a non-monotone response, a low-fidelity quantum regime)
+entirely uncovered.
+\item What we want to \emph{cover} lives on the output side. The properties an
+engineer cares about---calibration, robustness, fairness, monotonicity,
+measurement fidelity---are all statements about the \emph{output/behaviour} of
+the system, not about which inputs were combined.
+\end{itemize}
+
+\subsection{Inverting the paradigm}
+We therefore invert combinatorial testing. Instead of covering input
+combinations and observing whatever outputs result, \rnwise{} Output-Oriented
+Testing:
+\begin{enumerate}
+\item partitions the structured output space $Y = Y_1 \times \cdots \times Y_q$
+into semantic \emph{behaviour classes} via per-component partitioners
+$\pi_j: Y_j \to W_j$, yielding an abstract output $\fhat(x) =
+(\pi_1(y_1),\dots,\pi_q(y_q)) \in \Wspace$;
+\item constructs a $t$-way \emph{Output Covering Array} over $\Wspace$, so that
+every feasible $s$-way combination of output behaviours is a coverage target;
+\item recovers, for each target, a concrete input by \emph{inverse mapping}---a
+gradient-free search that minimises the mismatch between the realised abstract
+output and the target;
+\item prioritises the resulting tests by incremental output coverage.
+\end{enumerate}
+Coverage is measured on the output side (the fraction of feasible $s$-way output
+interactions exercised), which directly reflects behavioural adequacy and is
+model-agnostic: the identical procedure applies to a gradient-boosted classifier,
+a neural network, a text classifier, and a quantum circuit.
+
+\subsection{Contributions}
+\begin{enumerate}
+\item \textbf{A new adequacy criterion and formalism.} We define the abstract
+output map $\fhat$, the Output Covering Array $\OCA(M;s,q,w)$, and output
+coverage $\OCov_s$, and we establish coverage bounds---including the lower bound
+$M \ge v^{s}$ (Corollary~\ref{cor:lb})---for output-side combinatorial coverage
+(Section~\ref{sec:framework}).
+\item \textbf{A constructive algorithm.} A four-stage procedure
+(feasibility, covering-array construction, gradient-free inverse mapping,
+prioritisation) that produces an executable, prioritised test suite realising the
+target output interactions (Algorithm~\ref{alg:rnwise}).
+\item \textbf{A domain-agnostic instantiation.} We instantiate the method with
+five inverse-mapping optimisers---Jaya, Whale, Firefly, Bayesian optimisation,
+and a variational (VQE-style) optimiser for quantum systems---and four benchmark
+domains spanning tabular ML, vision, NLP, and quantum computing.
+\item \textbf{A rigorous empirical evaluation.} Over 30 repeated runs with
+non-parametric significance testing (Mann--Whitney $U$, bootstrap confidence
+intervals, Cliff's $\delta$), a strength study ($s=2,3,4$), ablations, and a cost
+profile, we show \rnwise{} uniquely attains perfect output coverage, matches the
+strongest behavioural baseline on fault detection, and generalises across all
+four domains (Section~\ref{sec:eval}).
+\end{enumerate}

@@ -19,6 +19,19 @@ def _fmt_pct(x: float) -> str:
     return f"{x * 100:.1f}\\%"
 
 
+_METRIC_LABEL = {
+    "OCov_s": "$\\mathrm{OCov}_s$",
+    "eta_s": "$\\eta_s$",
+    "FDR_pct": "FDR",
+    "FDR": "FDR",
+}
+
+
+def _metric_label(name: str) -> str:
+    """Render a raw metric key as a LaTeX-safe label (math where needed)."""
+    return _METRIC_LABEL.get(name, name.replace("_", "\\_"))
+
+
 def table_main_comparison(exp04: dict) -> str:
     """Main results table: per-method OCov_s / FDR with 95% CIs (from exp04)."""
     agg = exp04["aggregate"]
@@ -54,7 +67,7 @@ def table_significance(exp04: dict) -> str:
         pstr = f"{p:.1e}" if p < 1e-3 else f"{p:.3f}"
         sig = "$^{*}$" if c["significant"] else ""
         lines.append(
-            f"{c['metric']} & {c['b']} & {pstr}{sig} & {c['cliffs_delta']:.2f} & {c['effect']} \\\\"
+            f"{_metric_label(c['metric'])} & {c['b']} & {pstr}{sig} & {c['cliffs_delta']:.2f} & {c['effect']} \\\\"
         )
     lines += ["\\bottomrule", "\\end{tabular}"]
     return "\n".join(lines)
@@ -79,6 +92,54 @@ def table_strength(exp03: dict) -> str:
     return "\n".join(lines)
 
 
+def table_multidomain(exp02: dict) -> str:
+    """Multi-domain generality table (from exp02): RNWise vs random per domain."""
+    lines = [
+        "\\begin{tabular}{llrrrr}",
+        "\\toprule",
+        "Domain & Opt. & Method & Tests & OCov$_s$ & FDR \\\\",
+        "\\midrule",
+    ]
+    pretty = {"quantum": "Quantum", "vision": "Vision", "nlp": "NLP"}
+    for dom, r in exp02["domains"].items():
+        dname = pretty.get(dom, dom)
+        for i, row in enumerate(r["results"]):
+            method = "\\textbf{Reverse N-Wise}" if row["method"].startswith("Reverse") else "Random"
+            dcell = dname if i == 0 else ""
+            ocell = r["optimizer"] if i == 0 else ""
+            lines.append(
+                f"{dcell} & {ocell} & {method} & {row['tests']} & "
+                f"{_fmt_pct(row['OCov_s'])} & {row['FDR']} \\\\"
+            )
+        lines.append("\\midrule")
+    lines[-1] = "\\bottomrule"  # replace trailing midrule
+    lines.append("\\end{tabular}")
+    return "\n".join(lines)
+
+
+def table_cost(exp06: dict) -> str:
+    """Cost-profile table (from exp06): per-stage timing + budget."""
+    t = exp06["timings_s"]
+    br = exp06["budget_ratio"]
+    lines = [
+        "\\begin{tabular}{lr}",
+        "\\toprule",
+        "Quantity & Value \\\\",
+        "\\midrule",
+        f"Stage 1 (feasibility) & {t['step1_feasibility']:.2f} s \\\\",
+        f"Stage 2 (covering array) & {t['step2_covering_array']:.2f} s \\\\",
+        f"Stage 3 (inverse mapping) & {t['step3_inverse_map']:.2f} s \\\\",
+        f"Stage 4 (prioritise) & {t['step4_prioritize']:.2f} s \\\\",
+        f"Pipeline total & {t['pipeline_total']:.2f} s \\\\",
+        f"Peak memory & {exp06['peak_memory_mb']:.1f} MB \\\\",
+        f"SUT evaluations & {br['rnwise_calls']:,} \\\\",
+        f"Fraction of exhaustive sweep & {br['fraction_of_exhaustive']*100:.2f}\\% \\\\",
+        "\\bottomrule",
+        "\\end{tabular}",
+    ]
+    return "\n".join(lines).replace(",", "{,}")
+
+
 def csv_main_comparison(exp04: dict) -> str:
     agg = exp04["aggregate"]
     rows = ["method,tests,OCov_s_mean,OCov_s_lo,OCov_s_hi,FDR_mean,FDR_lo,FDR_hi"]
@@ -95,6 +156,8 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="emit LaTeX/CSV tables from results")
     ap.add_argument("--exp04", type=str, default="")
     ap.add_argument("--exp03", type=str, default="")
+    ap.add_argument("--exp02", type=str, default="")
+    ap.add_argument("--exp06", type=str, default="")
     ap.add_argument("--out", type=str, default="results/tables")
     args = ap.parse_args()
 
@@ -112,6 +175,16 @@ def main() -> None:
         e3 = json.loads(Path(args.exp03).read_text())
         (out / "table_strength.tex").write_text(table_strength(e3))
         print(f"wrote {out}/table_strength.tex")
+
+    if args.exp02:
+        e2 = json.loads(Path(args.exp02).read_text())
+        (out / "table_multidomain.tex").write_text(table_multidomain(e2))
+        print(f"wrote {out}/table_multidomain.tex")
+
+    if args.exp06:
+        e6 = json.loads(Path(args.exp06).read_text())
+        (out / "table_cost.tex").write_text(table_cost(e6))
+        print(f"wrote {out}/table_cost.tex")
 
 
 if __name__ == "__main__":

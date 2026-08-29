@@ -1,0 +1,34 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We introduced \rnwise{} Output-Oriented Testing, which inverts the combinatorial
+testing paradigm: rather than covering interactions among \emph{inputs} and
+observing whatever behaviour results, it constructs a $t$-way covering array over
+an abstracted \emph{output-behaviour} space and recovers concrete inputs by
+gradient-free inverse mapping. We formalised the Output Covering Array
+$\OCA(M;s,q,w)$ and the $\OCov_s$ criterion, established coverage bounds including
+$M\ge v^{s}$, and gave a four-stage algorithm that is agnostic to the SUT's
+internals.
+
+Empirically, across tabular ML, vision, NLP, and quantum systems, the same
+algorithm attains $100\%$ feasible output coverage. On a 30-run tabular study it
+uniquely reaches perfect output coverage (Mann--Whitney $U$ vs.\ every baseline,
+$p\approx6\times10^{-13}$, $\delta=1.0$), matches the strongest behavioural
+baseline on fault detection, and does so at roughly $8\%$ of an exhaustive-input
+search budget. The contribution is best understood as a new \emph{adequacy
+criterion}---output-interaction coverage---together with a constructive method to
+satisfy it, unifying behavioural testing of classical and quantum systems.
+
+\paragraph{Future work}
+Three directions stand out: (i) learning or optimising the output partition
+$\{\pi_j\}$ automatically, so that abstraction is data-driven rather than
+hand-specified; (ii) validating that $\OCov_s$ predicts real defect discovery on
+production ML pipelines and on quantum hardware, beyond seeded faults; and (iii)
+tightening the covering-array construction with constraint solvers to exploit
+output-side feasibility structure, further shrinking suites at higher strengths.
+
+\section*{Data Availability}
+The complete implementation, all benchmarks and baselines, the experiment drivers,
+and scripts that regenerate every table and figure from raw result artifacts are
+available in the accompanying repository, with pinned dependencies and a container
+image for deterministic reproduction.

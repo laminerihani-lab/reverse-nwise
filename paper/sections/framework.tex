@@ -1,0 +1,142 @@
+\section{Formal Framework}
+\label{sec:framework}
+
+\subsection{System model and output abstraction}
+
+\begin{definition}[System under test]
+\label{def:sut}
+A system under test (SUT) is a map $f: X \to \PY$ from an input space $X$ to a
+distribution over a structured output space $Y = Y_1 \times \cdots \times Y_q$.
+Deterministic systems are the degenerate case in which $f(x)$ places all mass on
+a single output vector $y = (y_1,\dots,y_q)$.
+\end{definition}
+
+The components $Y_j$ are heterogeneous behavioural channels: a predicted class, a
+confidence score, a robustness verdict, a measurement-outcome statistic, and so
+on. Raw outputs are continuous or high-cardinality, so we abstract each channel
+into a finite alphabet of \emph{behaviour symbols}.
+
+\begin{definition}[Semantic partition and abstract output]
+\label{def:partition}
+A partitioner $\pi_j: Y_j \to W_j$ maps a raw output component to a symbol in a
+finite alphabet $W_j$. The abstraction map is
+\[
+\fhat(x) \;=\; \bigl(\pi_1(y_1),\,\dots,\,\pi_q(y_q)\bigr) \in \Wspace,
+\quad y \sim f(x),
+\]
+evaluated at the most-probable output for stochastic $f$. We write $v = \max_j
+|W_j|$ for the maximum alphabet size and $v_j = |W_j|$.
+\end{definition}
+
+\subsection{Output covering arrays}
+
+Let $[q]=\{1,\dots,q\}$. An \emph{$s$-way output tuple} fixes symbols on an
+$s$-subset of channels.
+
+\begin{definition}[Output covering array]
+\label{def:oca}
+An Output Covering Array $\OCA(M;s,q,w)$ is a multiset of $M$ abstract-output rows
+$\{r_1,\dots,r_M\} \subseteq \Wspace$ such that for every $s$-subset
+$\{j_1<\cdots<j_s\}\subseteq[q]$ and every \emph{feasible} symbol combination
+$(a_1,\dots,a_s)\in W_{j_1}\times\cdots\times W_{j_s}$, some row $r_i$ satisfies
+$\pi_{j_k}$-projection $r_i[j_k]=a_k$ for all $k$. A symbol combination is
+\emph{feasible} if there exists an input $x\in X$ with $\fhat(x)$ exhibiting it.
+\end{definition}
+
+\begin{definition}[Output coverage and tuple efficiency]
+\label{def:metrics}
+For a test suite whose realised abstract outputs are $R$, the $s$-way output
+coverage is
+\[
+\OCov_s \;=\;
+\frac{\bigl|\{\text{feasible $s$-way tuples covered by } R\}\bigr|}
+     {\bigl|\{\text{feasible $s$-way tuples}\}\bigr|}\in[0,1],
+\]
+and the tuple efficiency $\etm_s$ is the number of distinct $s$-way tuples covered
+per test.
+\end{definition}
+
+\subsection{Coverage bounds}
+
+Let $T_s$ denote the number of feasible $s$-way output tuples. Because each row
+projects to exactly one tuple per $s$-subset, a single row covers at most
+$\binom{q}{s}$ tuples.
+
+\begin{theorem}[Universe size]
+\label{thm:universe}
+The number of $s$-way output tuples over $\Wspace$ (before feasibility pruning) is
+$\sum_{\{j_1<\cdots<j_s\}} \prod_{k=1}^{s} v_{j_k}$, which for the homogeneous case
+$v_j=v$ equals $\binom{q}{s}\,v^{s}$.
+\end{theorem}
+
+\begin{theorem}[Lower bound on rows]
+\label{thm:lb}
+Any $\OCA(M;s,q,w)$ satisfies $M \ge \max_{\{j_1<\cdots<j_s\}}\prod_{k=1}^{s}
+v_{j_k}$ whenever all corresponding symbol combinations are feasible. In
+particular, no single $s$-subset's tuples can be covered by fewer rows than the
+number of distinct symbol combinations on that subset.
+\end{theorem}
+
+\begin{proof}
+Fix the $s$-subset $J^{*}$ attaining the maximum product. Its feasible tuples are
+pairwise distinct on $J^{*}$, and each row of the array contributes exactly one
+symbol combination on $J^{*}$. Covering all $\prod_{k}v_{j_k}$ combinations
+therefore requires at least that many rows.
+\end{proof}
+
+\begin{corollary}[$M \ge v^{s}$]
+\label{cor:lb}
+For the homogeneous case $v_j=v$ with all combinations feasible on some
+$s$-subset, every $\OCA(M;s,q,w)$ satisfies $M \ge v^{s}$.
+\end{corollary}
+
+\begin{theorem}[Existence]
+\label{thm:existence}
+For any finite $\Wspace$ and strength $s\le q$, an $\OCA(M;s,q,w)$ covering all
+feasible $s$-way tuples exists. Enumerating one row per feasible abstract output
+is such an array; greedy construction (Algorithm~\ref{alg:rnwise}, Stage~2) yields
+one of size $O(v^{s}\log \binom{q}{s})$ in the homogeneous unconstrained case,
+matching the classical covering-array growth rate.
+\end{theorem}
+
+\subsection{The \rnwise{} algorithm}
+
+Given a target abstract output $w^{*}$, inverse mapping seeks an input realising
+it by minimising the mismatch loss
+\begin{equation}
+\label{eq:loss}
+L(x;w^{*}) \;=\; \sum_{j=1}^{q} \delta\!\bigl(\pi_j(f_j(x)),\, w^{*}_j\bigr)
+\;+\; \lambda\, R(x),
+\end{equation}
+where $\delta$ is the $0/1$ symbol mismatch, $R$ is an optional input regulariser
+keeping $x$ realistic, and $\lambda \ge 0$ trades feasibility against realism. A
+loss of zero means $\fhat(x)=w^{*}$ exactly.
+
+\begin{algorithm}[t]
+\caption{\rnwise{} Output-Oriented Testing}
+\label{alg:rnwise}
+\begin{algorithmic}[1]
+\REQUIRE SUT $f$, partition scheme $\{\pi_j\}$, strength $s$, probe inputs $P$,
+optimiser $\mathcal{O}$, budget \textsc{max\_iter}
+\ENSURE prioritised test suite $\mathcal{S}$
+\STATE \textbf{Stage 1 (Feasibility).} $\;\mathcal{F}\leftarrow\{\fhat(x): x\in
+P\}$; record an exemplar input per abstract output; induce feasible $s$-way tuples.
+\STATE \textbf{Stage 2 (Covering array).} build $\OCA(M;s,q,w)$ over $\mathcal{F}$
+(greedy: repeatedly add the feasible output covering the most uncovered feasible
+tuples; verify $M \ge v^{s}$).
+\STATE \textbf{Stage 3 (Inverse mapping).} \FORALL{rows $w^{*}$ of the array}
+  \STATE warm-start from the exemplar for $w^{*}$ if available;
+  \STATE else $x \leftarrow \arg\min_x L(x;w^{*})$ via $\mathcal{O}$ (up to
+  \textsc{max\_iter}); record realised $\fhat(x)$.
+\ENDFOR
+\STATE \textbf{Stage 4 (Prioritise).} greedily order tests by marginal
+$\OCov_s$; truncate at the coverage plateau.
+\RETURN $\mathcal{S}$
+\end{algorithmic}
+\end{algorithm}
+
+The four stages are independent of the SUT's internals: Stage~1 needs only
+black-box evaluations, Stage~2 is pure combinatorics over $\Wspace$, Stage~3 uses
+gradient-free optimisation (so it applies to non-differentiable and quantum
+systems), and Stage~4 is standard coverage-greedy prioritisation. This modularity
+is what makes the same algorithm applicable across all four evaluated domains.

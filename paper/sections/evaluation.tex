@@ -1,0 +1,127 @@
+\section{Empirical Evaluation}
+\label{sec:eval}
+
+We evaluate \rnwise{} against five baselines and across four domains, addressing
+four research questions:
+\begin{itemize}
+\item[\textbf{RQ1}] \emph{Coverage \& fault detection.} Does \rnwise{} achieve
+higher output coverage and fault detection than established baselines?
+\item[\textbf{RQ2}] \emph{Generality.} Does the same algorithm transfer across
+tabular ML, vision, NLP, and quantum systems?
+\item[\textbf{RQ3}] \emph{Strength.} Does the method scale to higher interaction
+strengths $s$, and does the $M\ge v^{s}$ bound hold?
+\item[\textbf{RQ4}] \emph{Cost \& sensitivity.} What is the computational cost,
+and how sensitive is it to design choices?
+\end{itemize}
+
+\subsection{Experimental setup}
+The primary study uses the UCI Adult income dataset~\cite{dua2019uci} with an
+XGBoost classifier~\cite{chen2016xgboost} ($\approx 87\%$ test accuracy). We
+abstract its behaviour into a $q=9$, all-ternary output space (pairwise universe
+$\binom{9}{2}\cdot 3^{2}=324$) spanning the decision, confidence, decision margin,
+sex-flip fairness consistency, age band, employment group, education- and
+hours-response monotonicity, and capital-gain regime. Eight behavioural faults are
+seeded as rare-but-reachable pairwise output signatures (e.g.\ fairness
+inconsistency localised to young applicants; a non-monotone education response
+under a positive decision).
+
+Baselines are scored on the identical feasible output universe: classical
+input-side combinatorial testing (Input CT), random testing at matched budget,
+property-based testing, metamorphic testing, and DeepCT-style
+activation-combination sampling. All experiments take an explicit seed;
+significance uses 30 fixed seeds. Reported values are means with $95\%$ percentile
+bootstrap confidence intervals; pairwise comparisons use the one-sided
+Mann--Whitney $U$ test with Cliff's $\delta$ effect size.
+
+\subsection{RQ1: Coverage and fault detection}
+Table~\ref{tab:main} reports the 30-run comparison. \rnwise{} attains
+\emph{perfect} pairwise output coverage on every run ($\OCov_2 = 100\%$,
+CI $[100,100]$) with $\approx 20$ prioritised tests, and $98.3\%$ fault detection.
+The strongest baseline, DeepCT, reaches $91.2\%$ coverage and $99.6\%$ fault
+detection but requires a large random activation pool to do so; the four classical
+baselines remain between $52\%$ and $59\%$ coverage and below $35\%$ fault
+detection.
+
+\begin{table}[t]
+\centering
+\caption{Main comparison on UCI Adult + XGBoost (pairwise, 30 runs).
+Means with $95\%$ bootstrap CIs.}
+\label{tab:main}
+\input{tables/table_main}
+\end{table}
+
+Table~\ref{tab:sig} gives the pairwise significance tests. \rnwise{} dominates
+\emph{every} baseline on output coverage---including DeepCT---at
+$p\approx 6\times10^{-13}$ with Cliff's $\delta=1.0$ (perfect, large effect):
+on all 30 seeds it strictly out-covers each competitor. On fault detection it
+dominates the four classical baselines ($p<10^{-12}$) and is statistically
+indistinguishable from DeepCT ($p=0.92$, $\delta=-0.10$, negligible). We report
+this tie transparently: both methods essentially detect all reachable seeded
+faults; the advantage of \rnwise{} is that it reaches this by \emph{direct
+inversion} rather than by sampling a large random pool (see RQ4).
+
+\begin{table}[t]
+\centering
+\caption{Pairwise Mann--Whitney $U$ (\rnwise{} $>$ baseline) with Cliff's
+$\delta$. $^{*}$ denotes $p<0.05$.}
+\label{tab:sig}
+\input{tables/table_significance}
+\end{table}
+
+\subsection{RQ2: Multi-domain generality}
+Table~\ref{tab:multidomain} applies the \emph{same} four-stage algorithm---changing
+only the SUT, the output partition, the search space, and the inverse-map
+optimiser---to a noisy quantum circuit (variational/VQE inverse map), an MLP image
+classifier on digits (over a PCA latent space), and a text classifier on
+newsgroups (over a TF--IDF$+$SVD embedding space). In every domain \rnwise{}
+reaches $100\%$ feasible output coverage and detects all five domain-specific
+seeded faults, whereas matched-budget random testing covers only $62\%$--$74\%$
+and detects $0$--$2$ of $5$. Together with the tabular study, this exercises the
+method on four structurally different system types with no change to the core
+algorithm.
+
+\begin{table}[t]
+\centering
+\caption{Multi-domain generality (per domain: \rnwise{} vs.\ matched-budget
+random).}
+\label{tab:multidomain}
+\input{tables/table_multidomain}
+\end{table}
+
+\subsection{RQ3: Interaction strength}
+Table~\ref{tab:strength} varies the coverage strength $s\in\{2,3,4\}$ on the
+tabular SUT. \rnwise{} maintains $100\%$ feasible coverage at every strength while
+the prioritised suite grows far more slowly than the output universe
+($324\to2{,}268\to10{,}206$ tuples but only $19\to58\to126$ tests). The
+Corollary~\ref{cor:lb} lower bound $M\ge v^{s}$ ($9,27,81$) holds throughout,
+empirically corroborating the theory.
+
+\begin{table}[t]
+\centering
+\caption{Strength scaling on UCI Adult + XGBoost. The $M\ge v^{s}$ bound
+(Corollary~\ref{cor:lb}) holds at every strength.}
+\label{tab:strength}
+\input{tables/table_strength}
+\end{table}
+
+\subsection{RQ4: Cost and sensitivity}
+Table~\ref{tab:cost} profiles the pipeline on commodity hardware. The end-to-end
+run completes in under $10$ seconds using $\approx 68$ MB, and issues about
+$8{,}200$ black-box SUT evaluations---roughly $8\%$ of a modest exhaustive-input
+sweep. The feasibility scan dominates the wall-clock time; warm-started inverse
+mapping is inexpensive.
+
+\begin{table}[t]
+\centering
+\caption{Cost profile of the \rnwise{} pipeline (UCI Adult + XGBoost).}
+\label{tab:cost}
+\input{tables/table_cost}
+\end{table}
+
+Ablations (omitted here for space, included in the artifact) confirm the design
+choices: (i) among inverse-map optimisers, Jaya and Whale are the most efficient
+(comparable realisation at $\approx 7\times$ fewer evaluations than Firefly),
+justifying Jaya as the default; (ii) coverage remains $100\%$ as output
+granularity varies from $2$ to $4$ bins per continuous factor; and (iii) a mild
+input regulariser ($\lambda>0$) slightly improves realisation by keeping
+synthesised inputs near the data manifold.

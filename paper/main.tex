@@ -1,0 +1,84 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+% --- packages ---
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{amsthm}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+
+% --- theorem environments ---
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+
+% --- shared macros ---
+\newcommand{\OCA}{\ensuremath{\mathrm{OCA}}}
+\newcommand{\OCov}{\ensuremath{\mathrm{OCov}}}
+\newcommand{\etm}{\ensuremath{\eta}}
+\newcommand{\fhat}{\ensuremath{\hat{f}}}
+\newcommand{\PY}{\ensuremath{\mathcal{P}(Y)}}
+\newcommand{\Wspace}{\ensuremath{W_1\times\cdots\times W_q}}
+\newcommand{\rnwise}{\textsc{Reverse N-Wise}}
+
+\begin{document}
+
+\title{Reverse N-Wise Output-Oriented Testing for\\ AI/ML and Quantum Computing Systems}
+
+\author{\IEEEauthorblockN{Lamine Rihani}
+\IEEEauthorblockA{\textit{SAP Labs France} \\
+Mougins, France \\
+lamine.rihani@sap.com}}
+
+\maketitle
+
+\begin{abstract}
+Combinatorial interaction testing builds covering arrays over a system's
+\emph{inputs}, on the premise that faults are triggered by interactions among a
+few input parameters. For modern AI/ML and quantum systems this premise is
+strained: the map from inputs to behaviour is opaque and stochastic, and vast
+regions of the input space collapse onto the same observable behaviour, so
+input-side coverage says little about which \emph{behaviours} were actually
+exercised. We invert the paradigm. \rnwise{} Output-Oriented Testing partitions a
+system's structured output space into semantic behaviour classes, constructs a
+$t$-way covering array over those \emph{output} classes, and then recovers
+concrete inputs by gradient-free \emph{inverse mapping}. We formalise the
+Output Covering Array $\OCA(M;s,q,w)$, establish coverage bounds
+(including $M \ge v^{s}$), and give a four-stage algorithm
+(feasibility, covering-array construction, inverse mapping, prioritisation).
+Across four structurally different domains---tabular ML (UCI Adult + XGBoost),
+vision (an MLP on digits), NLP (a text classifier on newsgroups), and a noisy
+quantum circuit---the \emph{same} algorithm attains 100\% feasible output
+coverage. On the tabular study over 30 repeated runs it uniquely reaches perfect
+output coverage (Mann--Whitney $U$ vs.\ every baseline, $p \approx 6\times
+10^{-13}$, Cliff's $\delta = 1.0$), matches the strongest baseline on fault
+detection, and does so at roughly $8\%$ of an exhaustive-input search budget.
+The approach is a new adequacy criterion---output-interaction coverage---together
+with a constructive method to satisfy it, unifying behavioural testing of
+classical and quantum systems.
+\end{abstract}
+
+\begin{IEEEkeywords}
+combinatorial testing, covering arrays, output-oriented testing, machine
+learning testing, quantum software testing, test adequacy
+\end{IEEEkeywords}
+
+\input{sections/introduction}
+\input{sections/related}
+\input{sections/framework}
+\input{sections/evaluation}
+\input{sections/threats}
+\input{sections/conclusion}
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
