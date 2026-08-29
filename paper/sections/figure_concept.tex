@@ -1,0 +1,55 @@
+% Concept / architecture figure: paradigm inversion + four-stage pipeline.
+% Self-contained TikZ (no external assets).
+\begin{figure}[t]
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tikzpicture}[
+  font=\small,
+  >={Stealth[round]},
+  box/.style={rounded corners=2pt, draw, thick, minimum height=8mm,
+              minimum width=15mm, align=center, inner sep=3pt},
+  inbox/.style={box, fill=blue!10, draw=blue!55},
+  outbox/.style={box, fill=red!10, draw=red!55},
+  stage/.style={box, fill=green!12, draw=green!50!black, minimum width=17mm},
+  lbl/.style={font=\footnotesize\itshape, text=black!60},
+  ar/.style={->, thick},
+]
+
+% ---- top: classical (input-side) ----
+\node[inbox] (cin) {Input\\covering\\array};
+\node[box, fill=black!6, right=8mm of cin] (csut) {SUT\\$f:X\!\to\!\mathcal{P}(Y)$};
+\node[outbox, right=8mm of csut] (cout) {Outputs\\(uncontrolled)};
+\draw[ar, blue!55] (cin) -- (csut);
+\draw[ar, black!45] (csut) -- (cout);
+\node[lbl, above=1mm of csut] {classical: cover inputs, observe outputs};
+
+% ---- divider label ----
+\node[lbl, below=4mm of csut, text=red!70!black, font=\footnotesize\bfseries]
+  (inv) {paradigm inversion};
+
+% ---- bottom: reverse (output-side) four stages ----
+\node[stage, below=10mm of cin, xshift=-2mm] (s1)
+  {\textbf{1} Feasibility\\$\hat f(x)\!\in\!W$};
+\node[stage, right=5mm of s1] (s2)
+  {\textbf{2} Output\\cov.\ array\\$\mathrm{OCA}$};
+\node[stage, right=5mm of s2] (s3)
+  {\textbf{3} Inverse\\map\\$\min_x L(x;w^{*})$};
+\node[stage, right=5mm of s3] (s4)
+  {\textbf{4} Prioritise\\$\mathrm{OCov}_s$};
+\draw[ar, green!45!black] (s1) -- (s2);
+\draw[ar, green!45!black] (s2) -- (s3);
+\draw[ar, green!45!black] (s3) -- (s4);
+
+% feedback: covered output behaviour -> concrete input (the inversion)
+\draw[ar, red!60, dashed] (s3.south) .. controls +(0,-7mm) and +(0,-7mm) ..
+  node[lbl, below, text=red!70!black] {each covered output behaviour $\Rightarrow$ a concrete input test} (s1.south);
+
+\end{tikzpicture}%
+}
+\caption{Classical combinatorial testing (top) covers \emph{input} interactions and
+observes whatever outputs result. \rnwise{} (bottom) inverts this: it covers a
+$t$-way array over \emph{abstracted output behaviours} and recovers concrete
+inputs by gradient-free inverse mapping. The four stages are agnostic to the
+system's internals, so the same pipeline applies to ML and quantum systems.}
+\label{fig:concept}
+\end{figure}

@@ -17,6 +17,7 @@ tables:
 		--exp04 $(RESULTS)/exp04_30runs.json \
 		--exp03 $(RESULTS)/exp03_seed0.json \
 		--exp02 $(RESULTS)/exp02_multidomain.json \
+		--exp05 $(RESULTS)/exp05_seed0.json \
 		--exp06 $(RESULTS)/exp06_seed0.json \
 		--out paper/tables
 

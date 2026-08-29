@@ -27,6 +27,11 @@ _METRIC_LABEL = {
 }
 
 
+def _num(n: int) -> str:
+    """Thousands-separated integer, LaTeX-safe (braces protect the comma)."""
+    return f"{n:,}".replace(",", "{,}")
+
+
 def _metric_label(name: str) -> str:
     """Render a raw metric key as a LaTeX-safe label (math where needed)."""
     return _METRIC_LABEL.get(name, name.replace("_", "\\_"))
@@ -132,12 +137,57 @@ def table_cost(exp06: dict) -> str:
         f"Stage 4 (prioritise) & {t['step4_prioritize']:.2f} s \\\\",
         f"Pipeline total & {t['pipeline_total']:.2f} s \\\\",
         f"Peak memory & {exp06['peak_memory_mb']:.1f} MB \\\\",
-        f"SUT evaluations & {br['rnwise_calls']:,} \\\\",
+        f"SUT evaluations & {_num(br['rnwise_calls'])} \\\\",
         f"Fraction of exhaustive sweep & {br['fraction_of_exhaustive']*100:.2f}\\% \\\\",
         "\\bottomrule",
         "\\end{tabular}",
     ]
-    return "\n".join(lines).replace(",", "{,}")
+    return "\n".join(lines)
+
+
+def table_ablation(exp05: dict) -> str:
+    """Three-panel ablation table (from exp05): optimizer, granularity, lambda.
+
+    Optimizer and lambda panels run without warm start on a fixed 40-target
+    sample (raw inverse-map power); the granularity panel uses warm start over
+    the full feasible set.
+    """
+    lines = [
+        "\\begin{tabular}{lrrr}",
+        "\\toprule",
+        "\\multicolumn{4}{l}{\\emph{(a) Inverse-map optimizer (no warm start, 40 targets)}} \\\\",
+        "Optimizer & Realise & $\\mathrm{OCov}_s$ & SUT evals \\\\",
+        "\\midrule",
+    ]
+    for r in exp05["optimizer_ablation"]:
+        lines.append(
+            f"{r['optimizer']} & {_fmt_pct(r['realisation_rate'])} & "
+            f"{_fmt_pct(r['OCov_s'])} & {_num(r['sut_evals'])} \\\\"
+        )
+    lines += [
+        "\\midrule",
+        "\\multicolumn{4}{l}{\\emph{(b) Output granularity (warm start, full set)}} \\\\",
+        "Bins/factor & Universe & Feasible & $\\mathrm{OCov}_s$ \\\\",
+        "\\midrule",
+    ]
+    for r in exp05["granularity_ablation"]:
+        lines.append(
+            f"{r['levels']} & {r['full_universe']} & {r['feasible_tuples']} & "
+            f"{_fmt_pct(r['OCov_s'])} \\\\"
+        )
+    lines += [
+        "\\midrule",
+        "\\multicolumn{4}{l}{\\emph{(c) Regulariser weight $\\lambda$ (no warm start, 40 targets)}} \\\\",
+        "$\\lambda$ & Realise & $\\mathrm{OCov}_s$ & SUT evals \\\\",
+        "\\midrule",
+    ]
+    for r in exp05["lambda_ablation"]:
+        lines.append(
+            f"{r['lambda']:g} & {_fmt_pct(r['realisation_rate'])} & "
+            f"{_fmt_pct(r['OCov_s'])} & {_num(r['sut_evals'])} \\\\"
+        )
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    return "\n".join(lines)
 
 
 def csv_main_comparison(exp04: dict) -> str:
@@ -157,6 +207,7 @@ def main() -> None:
     ap.add_argument("--exp04", type=str, default="")
     ap.add_argument("--exp03", type=str, default="")
     ap.add_argument("--exp02", type=str, default="")
+    ap.add_argument("--exp05", type=str, default="")
     ap.add_argument("--exp06", type=str, default="")
     ap.add_argument("--out", type=str, default="results/tables")
     args = ap.parse_args()
@@ -185,6 +236,11 @@ def main() -> None:
         e6 = json.loads(Path(args.exp06).read_text())
         (out / "table_cost.tex").write_text(table_cost(e6))
         print(f"wrote {out}/table_cost.tex")
+
+    if args.exp05:
+        e5 = json.loads(Path(args.exp05).read_text())
+        (out / "table_ablation.tex").write_text(table_ablation(e5))
+        print(f"wrote {out}/table_ablation.tex")
 
 
 if __name__ == "__main__":

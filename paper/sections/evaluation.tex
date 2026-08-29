@@ -118,10 +118,23 @@ mapping is inexpensive.
 \input{tables/table_cost}
 \end{table}
 
-Ablations (omitted here for space, included in the artifact) confirm the design
-choices: (i) among inverse-map optimisers, Jaya and Whale are the most efficient
-(comparable realisation at $\approx 7\times$ fewer evaluations than Firefly),
-justifying Jaya as the default; (ii) coverage remains $100\%$ as output
-granularity varies from $2$ to $4$ bins per continuous factor; and (iii) a mild
-input regulariser ($\lambda>0$) slightly improves realisation by keeping
-synthesised inputs near the data manifold.
+Table~\ref{tab:ablation} reports three ablations that justify the design
+choices. \emph{(a)} Among inverse-map optimisers, evaluated \emph{without} warm
+start to expose raw search power, Jaya and Whale reach the same $70\%$ realisation
+at roughly $7$--$9\times$ fewer SUT evaluations than Firefly, motivating Jaya as
+the default; note that with warm start (Table~\ref{tab:cost}) realisation rises to
+$100\%$, confirming the value of seeding from feasibility exemplars.
+\emph{(b)} Coverage remains $100\%$ as the output granularity varies from $2$ to
+$4$ bins per continuous factor---the criterion is robust to the abstraction
+choice, with cost scaling gracefully with the universe size. \emph{(c)} A mild
+input regulariser ($\lambda>0$) slightly \emph{improves} realisation
+($67.5\%\to72.5\%$) by keeping synthesised inputs near the data manifold, at the
+cost of more evaluations; coverage is stable across $\lambda$.
+
+\begin{table}[t]
+\centering
+\caption{Ablations on UCI Adult + XGBoost: inverse-map optimiser, output
+granularity, and regulariser weight.}
+\label{tab:ablation}
+\input{tables/table_ablation}
+\end{table}

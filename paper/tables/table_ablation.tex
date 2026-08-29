@@ -1,0 +1,25 @@
+\begin{tabular}{lrrr}
+\toprule
+\multicolumn{4}{l}{\emph{(a) Inverse-map optimizer (no warm start, 40 targets)}} \\
+Optimizer & Realise & $\mathrm{OCov}_s$ & SUT evals \\
+\midrule
+Jaya & 70.0\% & 88.6\% & 56{,}750 \\
+Whale & 70.0\% & 87.0\% & 47{,}200 \\
+Firefly & 22.5\% & 89.4\% & 417{,}054 \\
+\midrule
+\multicolumn{4}{l}{\emph{(b) Output granularity (warm start, full set)}} \\
+Bins/factor & Universe & Feasible & $\mathrm{OCov}_s$ \\
+\midrule
+2 & 277 & 221 & 100.0\% \\
+3 & 324 & 254 & 100.0\% \\
+4 & 373 & 286 & 100.0\% \\
+\midrule
+\multicolumn{4}{l}{\emph{(c) Regulariser weight $\lambda$ (no warm start, 40 targets)}} \\
+$\lambda$ & Realise & $\mathrm{OCov}_s$ & SUT evals \\
+\midrule
+0 & 67.5\% & 86.6\% & 65{,}190 \\
+0.1 & 72.5\% & 87.8\% & 145{,}200 \\
+0.5 & 72.5\% & 87.8\% & 145{,}200 \\
+1 & 72.5\% & 87.8\% & 145{,}200 \\
+\bottomrule
+\end{tabular}
