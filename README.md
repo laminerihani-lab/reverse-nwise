@@ -119,6 +119,18 @@ pytest              # 76 fast unit tests (slow tests skipped by default)
 pytest -m ""        # all 81, incl. slow integration tests (train models, full pipeline)
 ```
 
+## Building the paper
+
+The LaTeX source lives in `paper/`. A single source produces two builds via an
+anonymisation toggle:
+
+```bash
+cd paper
+make tables   # regenerate all tables from the result JSONs (optional)
+make          # main.pdf        -- named build (arXiv / camera-ready)
+make anon     # main-blind.pdf  -- anonymised build (ICST/AST double-blind review)
+```
+
 ## Determinism
 
 All experiments take an explicit `--seed`; `configs/seeds.yaml` pins the 30 seeds

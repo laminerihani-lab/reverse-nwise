@@ -36,3 +36,5 @@ paper/*.log
 paper/*.out
 paper/*.run.xml
 paper/sections/*.aux
+# anonymised submission build is regenerable via `make anon`
+paper/main-blind.pdf

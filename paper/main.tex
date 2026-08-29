@@ -1,6 +1,15 @@
 \documentclass[conference]{IEEEtran}
 \IEEEoverridecommandlockouts
 
+% --- anonymisation toggle -------------------------------------------------
+% Named build (arXiv): compile normally  ->  pdflatex main.tex
+% Blind build (ICST/AST double-blind): define \ANONYMOUS on the command line:
+%   pdflatex "\def\ANONYMOUS{}\input{main}"      (or use `make anon`)
+% When blind, author identity, e-mail, and the repository/data-availability link
+% are replaced with anonymous placeholders; self-references stay third-person.
+\newif\ifanon
+\ifx\ANONYMOUS\undefined\anonfalse\else\anontrue\fi
+
 % --- packages ---
 \usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts}
@@ -35,10 +44,15 @@
 
 \title{Reverse N-Wise Output-Oriented Testing for\\ AI/ML and Quantum Computing Systems}
 
-\author{\IEEEauthorblockN{Lamine Rihani}
-\IEEEauthorblockA{\textit{SAP France} \\
-Levallois-Perret, France \\
-lamine.rihani@sap.com}}
+\ifanon
+  \author{\IEEEauthorblockN{Anonymous Author(s)}
+  \IEEEauthorblockA{Affiliation withheld for double-blind review}}
+\else
+  \author{\IEEEauthorblockN{Lamine Rihani}
+  \IEEEauthorblockA{\textit{SAP France} \\
+  Levallois-Perret, France \\
+  lamine.rihani@sap.com}}
+\fi
 
 \maketitle
 
