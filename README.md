@@ -121,14 +121,22 @@ pytest -m ""        # all 81, incl. slow integration tests (train models, full p
 
 ## Building the paper
 
-The LaTeX source lives in `paper/`. A single source produces two builds via an
-anonymisation toggle:
+The manuscript exists in two conference formats that share a single source of
+truth: the section bodies (`paper/sections/`), `paper/references.bib`, and the
+auto-generated `paper/tables/` are written once and reused by both builds.
+
+- `paper/` &mdash; **ICST** build (IEEE `IEEEtran`, two-column conference).
+- `paper-ast/` &mdash; **AST** build (ACM `acmart` sigconf); `main.tex` only
+  supplies the ACM class and front matter and `\input`s the shared content.
+
+Each build has a named and an anonymised (double-blind) variant via the same
+`\ifanon` toggle:
 
 ```bash
-cd paper
-make tables   # regenerate all tables from the result JSONs (optional)
-make          # main.pdf        -- named build (arXiv / camera-ready)
-make anon     # main-blind.pdf  -- anonymised build (ICST/AST double-blind review)
+cd paper        # or: cd paper-ast
+make tables     # regenerate the shared tables from result JSONs (optional)
+make            # main.pdf        -- named build (arXiv / camera-ready)
+make anon       # main-blind.pdf  -- anonymised build (double-blind review)
 ```
 
 ## Determinism

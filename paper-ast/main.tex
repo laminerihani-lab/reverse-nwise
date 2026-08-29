@@ -1,0 +1,132 @@
+% AST 2027 build -- ACM acmart (sigconf), reusing the shared paper content.
+%
+%   make        -> main.pdf         (named, camera-ready style)
+%   make anon   -> main-blind.pdf   (anonymous, for AST double-blind review)
+%
+% The section bodies, references.bib, and tables/ are shared with the ICST
+% (IEEEtran) build under ../paper/ -- this file only supplies the ACM class,
+% front matter, and environment definitions.
+
+% Anonymisation toggle: `make anon` passes \def\ANONYMOUS{}.
+\ifx\ANONYMOUS\undefined
+  \documentclass[sigconf]{acmart}
+\else
+  \documentclass[sigconf,anonymous]{acmart}
+\fi
+
+% \ifanon drives the conditional bits inside the shared section files (e.g. the
+% data-availability URL). Keep it consistent with the class's anonymous option.
+\newif\ifanon
+\ifx\ANONYMOUS\undefined\anonfalse\else\anontrue\fi
+
+% --- packages (acmart already loads amsmath/amssymb/amsthm) ---
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc}
+
+% acmart provides amsthm; define the same theorem environments as the IEEE build.
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+
+% --- shared macros (identical to the IEEE build) ---
+\newcommand{\OCA}{\ensuremath{\mathrm{OCA}}}
+\newcommand{\OCov}{\ensuremath{\mathrm{OCov}}}
+\newcommand{\etm}{\ensuremath{\eta}}
+\newcommand{\fhat}{\ensuremath{\hat{f}}}
+\newcommand{\PY}{\ensuremath{\mathcal{P}(Y)}}
+\newcommand{\Wspace}{\ensuremath{W_1\times\cdots\times W_q}}
+\newcommand{\rnwise}{\textsc{Reverse N-Wise}}
+
+% --- ACM conference/proceedings metadata (placeholder until AST assigns) ---
+\acmConference[AST 2027]{IEEE/ACM International Conference on Automation of
+Software Test}{April 2027}{Dublin, Ireland}
+\acmYear{2027}
+\settopmatter{printacmref=true}
+\setcopyright{acmlicensed}
+
+% Shared content lives under ../paper. Add it to LaTeX's input search path so
+% that \input{sections/...} and the nested \input{tables/...} inside them all
+% resolve against ../paper/ -- a single source of truth for both builds.
+\makeatletter
+\def\input@path{{../paper/}}
+\makeatother
+
+\begin{document}
+
+\title{Reverse N-Wise Output-Oriented Testing for AI/ML and Quantum Computing
+Systems}
+
+\author{Lamine Rihani}
+\affiliation{%
+  \institution{SAP France}
+  \city{Levallois-Perret}
+  \country{France}}
+\email{lamine.rihani@sap.com}
+
+\renewcommand{\shortauthors}{Rihani}
+
+\begin{abstract}
+Combinatorial interaction testing builds covering arrays over a system's
+\emph{inputs}, on the premise that faults are triggered by interactions among a
+few input parameters. For modern AI/ML and quantum systems this premise is
+strained: the map from inputs to behaviour is opaque and stochastic, and vast
+regions of the input space collapse onto the same observable behaviour, so
+input-side coverage says little about which \emph{behaviours} were actually
+exercised. We invert the paradigm. \rnwise{} Output-Oriented Testing partitions a
+system's structured output space into semantic behaviour classes, constructs a
+$t$-way covering array over those \emph{output} classes, and then recovers
+concrete inputs by gradient-free \emph{inverse mapping}. We formalise the
+Output Covering Array $\OCA(M;s,q,w)$, establish coverage bounds
+(including $M \ge v^{s}$), and give a four-stage algorithm
+(feasibility, covering-array construction, inverse mapping, prioritisation).
+Across four structurally different domains---tabular ML (UCI Adult + XGBoost),
+vision (an MLP on digits), NLP (a text classifier on newsgroups), and a noisy
+quantum circuit---the \emph{same} algorithm attains 100\% feasible output
+coverage. On the tabular study over 30 repeated runs it uniquely reaches perfect
+output coverage (Mann--Whitney $U$ vs.\ every baseline, $p \approx 6\times
+10^{-13}$, Cliff's $\delta = 1.0$), matches the strongest baseline on fault
+detection, and does so at roughly $8\%$ of an exhaustive-input search budget.
+The approach is a new adequacy criterion---output-interaction coverage---together
+with a constructive method to satisfy it, unifying behavioural testing of
+classical and quantum systems.
+\end{abstract}
+
+\begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10011007.10011074.10011099.10011102.10011103</concept_id>
+<concept_desc>Software and its engineering~Software testing and debugging</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+<concept>
+<concept_id>10010147.10010257</concept_id>
+<concept_desc>Computing methodologies~Machine learning</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
+\ccsdesc[500]{Software and its engineering~Software testing and debugging}
+\ccsdesc[300]{Computing methodologies~Machine learning}
+
+\keywords{combinatorial testing, covering arrays, output-oriented testing,
+machine learning testing, quantum software testing, test adequacy}
+
+\maketitle
+
+\input{sections/introduction}
+\input{sections/figure_concept}
+\input{sections/related}
+\input{sections/framework}
+\input{sections/evaluation}
+\input{sections/threats}
+\input{sections/conclusion}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{../paper/references}
+
+\end{document}
