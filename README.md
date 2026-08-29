@@ -35,7 +35,7 @@ benchmarks/
   quantum/           self-contained NISQ statevector SUT (no qiskit needed)
 experiments/       exp01..exp06 (see below)
 analysis/          stats (MWU / bootstrap / Cliff's delta), LaTeX tables, plots
-tests/             81 unit + integration tests
+tests/             76 fast unit tests + 5 slow integration tests
 configs/           declarative experiment configs + fixed seeds
 ```
 
@@ -115,8 +115,8 @@ NLP, and quantum systems — output-oriented coverage is domain-agnostic.
 ## Tests
 
 ```bash
-pytest              # 81 fast unit tests
-pytest -m ""        # include slow integration tests (train models, full pipeline)
+pytest              # 76 fast unit tests (slow tests skipped by default)
+pytest -m ""        # all 81, incl. slow integration tests (train models, full pipeline)
 ```
 
 ## Determinism

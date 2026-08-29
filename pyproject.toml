@@ -65,7 +65,7 @@ include = ["rnwise*", "baselines*", "benchmarks*", "analysis*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra -q"
+addopts = "-ra -q -m 'not slow'"
 markers = [
     "slow: integration tests that train models / run full experiments",
 ]
