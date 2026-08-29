@@ -10,7 +10,7 @@ python-sat==1.8.dev13
 ortools==9.10.4067
 
 # optional groups (installed via extras, listed for the frozen artifact image)
-qiskit==1.2.4
+qiskit==1.4.2
 qiskit-aer==0.15.1
 scikit-optimize==0.10.2
 matplotlib==3.9.2

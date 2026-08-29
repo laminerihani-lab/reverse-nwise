@@ -40,7 +40,7 @@ dependencies = [
 
 [project.optional-dependencies]
 quantum = [
-    "qiskit>=1.0",
+    "qiskit>=1.4.2",
     "qiskit-aer>=0.13",
 ]
 bayesopt = [
